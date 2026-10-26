@@ -430,6 +430,29 @@ describe("reactor interaction", () => {
     )
   })
 
+  it("labels ERC20 fusion as gross and shows the estimated net output", () => {
+    mocks.devFee = 10n ** 15n
+    renderPage()
+    chooseFrom("BUNDLE")
+    inputAmount("1")
+
+    expect(screen.getByText("To (gross, before fees)")).toBeInTheDocument()
+    expect(screen.getByText("0.989 WETH")).toBeInTheDocument()
+    expect(screen.getByRole("spinbutton")).toHaveValue(1)
+  })
+
+  it("keeps the native fusion target labeled as net, not gross", () => {
+    mocks.native = true
+    renderPage()
+    chooseFrom("BUNDLE")
+    fireEvent.click(screen.getByRole("button", { name: "ETH (native)" }))
+    inputAmount("1")
+
+    expect(screen.getByText("To")).toBeInTheDocument()
+    expect(screen.queryByText("To (gross, before fees)")).not.toBeInTheDocument()
+    expect(screen.queryByText(/Estimated net received:/)).not.toBeInTheDocument()
+  })
+
   it("reverses the pair and preserves gross ERC20 fusion input semantics", () => {
     renderPage()
     fireEvent.click(
