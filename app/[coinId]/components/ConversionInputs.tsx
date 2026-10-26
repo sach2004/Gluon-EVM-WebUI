@@ -80,6 +80,12 @@ export function ConversionInputs({ model }: ConversionInputsProps) {
     toInputReadOnly,
   } = model
 
+  // ERC20 fusion takes a gross reserve amount; native fusion takes a net amount.
+  const isGrossFusion = fromToken === "BUNDLE" && toToken === "BASE" && !useNativeBase
+  const netReceived = isGrossFusion
+    ? breakdownPopover?.rows.find((row) => row.label === "Net received")?.value
+    : undefined
+
   return (
     <>
       <div className="space-y-2 rounded-xl border border-border bg-background p-3">
@@ -160,7 +166,7 @@ export function ConversionInputs({ model }: ConversionInputsProps) {
 
       <div className="space-y-2 rounded-xl border border-border bg-background p-3">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>To</span>
+          <span>{isGrossFusion ? "To (gross, before fees)" : "To"}</span>
           <div className="flex items-center gap-2">
             {breakdownPopover && (
               <Popover>
@@ -234,6 +240,11 @@ export function ConversionInputs({ model }: ConversionInputsProps) {
             className="min-w-0 w-full text-xl sm:text-2xl font-semibold h-11 sm:h-11 bg-background/60"
           />
         </div>
+        {netReceived && (
+          <p className="text-xs text-muted-foreground">
+            Estimated net received: <span className="font-mono text-foreground">{netReceived}</span>
+          </p>
+        )}
       </div>
     </>
   )
